@@ -50,7 +50,7 @@ def getEmails(num=1):
     service = build('gmail', 'v1', credentials=creds)
 
     # request a list of all the messages
-    result = service.users().messages().list(userId='me', maxResults=num,labelIds = 'INBOX').execute()
+    result = service.users().messages().list(userId='me', maxResults=num,labelIds = ['INBOX']).execute()
 
     # We can also pass maxResults to get any number of emails. Like this:
     # result = service.users().messages().list(maxResults=200, userId='me').execute()
@@ -61,6 +61,7 @@ def getEmails(num=1):
     # iterate through all the messages
     for i,msg in enumerate(messages):
         # Get the message from its id
+        info = []
         txt = service.users().messages().get(userId='me', id=msg['id'], format="full").execute()
         print(txt)
         # Use try-except to avoid any Errors
@@ -86,23 +87,51 @@ def getEmails(num=1):
             # it with BeautifulSoup library
 
             msg = base64.urlsafe_b64decode(data.encode('UTF8'))
-            body = str(email.message_from_bytes(msg)).replace('\n', ' ')
-            body_list.append(body)
+            body = str(email.message_from_bytes(msg))
+            # print(email.message_from_bytes(msg))
+            body_list= body.split("\n")
+        #    service.users().messages().modify(userId='me', id=msg['id'], body = {'removeLabelIds': ['UNREAD']}).execute()
+
 
         except:
-            pass
-
-    return body_list
-email = getEmails(1)
-print(email)
-print(parseprice.extractPrice(email))
+            continue
+        info.append((sender, subject, body_list))
+    return info
 
 
+def is_git_freight_quote_subject(subject):
+  re2 = "#[0-9]{10}-[0-9]{3}"
+  a = re.findall(re2, subject)
+  if len(a) == 0:
+    return False
+  else:
+    return True
 
+def get_major_minor_ids(subject):
+  ID1 = subject.split("#")
+  major_ID = ID1[1]
+  major_ID1 = major_ID.split("-")
+  ID2 = major_ID.split("-")
+  minor_ID = ID2[1]
+  # subject.split("#")
+  # split("-")
 
+  return [major_ID1[0], minor_ID]
 
-
-
-
-
+emails = getEmails(1)
+print(emails)
+for a in emails:
+    subject = a[1]
+    print ("subject:",subject)
+    print(is_git_freight_quote_subject(subject))
+    if is_git_freight_quote_subject(subject):
+        result = {}
+        b = parseprice.extractPrice(a[2])
+        # print ("Test", b)
+        for h in b:
+            if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h['DETAIL'].lower():
+                result = h
+        result['Major_ID'] = get_major_minor_ids(subject)[0]
+        result['Minor_ID'] = get_major_minor_ids(subject)[1]
+        print(result)
 

@@ -293,6 +293,9 @@ def list_all_my_quotes(email_adress):
     # return all the quotes as a list from the users' record
 
     return json.dumps(user_db[email_adress]["quotes"])
+# Total price: $50
+# Other additional: $40
+# other price: $20
 
 
 app.run(host='0.0.0.0')

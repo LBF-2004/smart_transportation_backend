@@ -25,6 +25,13 @@ grammar = """PRICE:{<[$]><CD>}
              DETAIL:{<DT>?<VBG>?(<NN>|<NNS>|<NNP>|<JJ>|<ORGANIZATION>|<PERSON>|<[.]>|<GPE>|<CD>|<RB>|<IN>)+<VBD>?<[:]>?<VBP>?<VB>?<VBZ>?(<[(]>(<JJ>|<CD>)<NNP>(<NN>|<NNS>)<[)]>)?<PRICE>}
              DETAIL:{<PRICE><DT>?<VBG>?(<NN>|<NNS>|<NNP>|<JJ>|<ORGANIZATION>|<PERSON>|<[.]>|<GPE>|<CD>|<RB>|<IN>)+<VBP>?<VB>?}"""
 
+# mechanism of grammar? What does it mean?
+# this grammar only tokens the last number with "$", but first (usually the most important one) not tokenized
+# the first one always starts with "Rate" (major fees)
+# the second important information is FSC, with "%"
+# need to extract all numbers with "$" and "%"q
+
+
 def chunk(sentence):  # make word with tags into a tree
     first_pass = nltk.ne_chunk(sentence)
     chunker = nltk.RegexpParser(grammar)
@@ -53,12 +60,14 @@ def extractPrice(sentences):
     for i in chunkization:
         trees = extractTree(i, "PRICE")
         trees_detail = extractTree(i, "DETAIL")
+        # print(trees_detail, len(trees_detail))
+        # print(trees, len(trees))
         if trees:
-            for j in trees:
+            for index,j in enumerate(trees):
                 price = ' '.join([w for w, t in j.leaves()])
-            for z in trees_detail:
-                price_detail = ' '.join([w for w, t in z.leaves()])
-            price_list.append({"DETAIL": price_detail, "PRICE": price})
+                price_detail = ' '.join([w for w, t in trees_detail[index].leaves()])
+
+                price_list.append({"DETAIL": price_detail, "PRICE": price})
 
 
 
@@ -67,5 +76,5 @@ def extractPrice(sentences):
             # [] after: break up word (w) and tag (t), only extract word
             # j.leaves function return tuple [(w1, tag1), (w2, tag2)...]
     return price_list
-print(extractPrice(["Hello, the deliv rate is $300.50. Thanks"]))
+
 
