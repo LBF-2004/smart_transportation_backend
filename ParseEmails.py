@@ -92,8 +92,8 @@ def getEmails(num=1):
             body_list= body.split("\n")
         #    service.users().messages().modify(userId='me', id=msg['id'], body = {'removeLabelIds': ['UNREAD']}).execute()
 
-
-        except:
+        except Exception as e:
+            print(e)
             continue
         info.append((sender, subject, body_list))
     return info
@@ -118,9 +118,18 @@ def get_major_minor_ids(subject):
 
   return [major_ID1[0], minor_ID]
 
-emails = getEmails(1)
+# TODO
+# 1. getEmails bug fix
+# 2. migrate the repl server back to this project: https://replit.com/join/fhcmpzms-sunyu912
+# 3. write the quote results back to the DB
+# 4. periodic runner with timestamp to keep loading the emails
+# 5. update the API to get the quote data with best pricing algorithm
+
+emails = getEmails(2) # here is the bug
 print(emails)
+print("Total emails: ", len(emails))
 for a in emails:
+
     subject = a[1]
     print ("subject:",subject)
     print(is_git_freight_quote_subject(subject))
