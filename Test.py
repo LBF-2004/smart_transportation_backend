@@ -134,14 +134,6 @@ user_db = {
             "current time": 162123254223
         }]
     },
-    "user1@gmail.com": "test555",
-    "newuser@gmail.com": {
-        "password": "test123",
-        "name": "Leo Liao",
-        "phone": "3451233434",
-        "email": "newuser@gmail.com",
-        "id": "user001",
-    },
     "leoliaobofei20041217@gmail.com": {
         "password": "12345",
         "first_name": "Leo",
@@ -194,12 +186,12 @@ def saved_quote_email():
             Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
             userID = ParseEmails.get_major_minor_user_ids(subject)[2]
             for key, value in user_db.items():
-                print(value)
+                print(type(value))
                 if value["id"] == userID:
-                    for i in range (user_db[key][value]["quotes"]):
-                        if user_db[key][value]["quotes"][i]["quoteID"] == Major_ID:
-                            user_db[key][value]["quotes"][i]["list_prices"][Minor_ID] = result
-                            compare_prices(user_db[key][value]["quotes"][i]["list_prices"])
+                    for i in range (len(value["quotes"])):
+                        if value["quotes"][i]["quoteID"] == Major_ID:
+                           value["quotes"][i]["list_prices"][Minor_ID] = result
+                           compare_prices(value["quotes"][i]["list_prices"])
     return "New Quotes Saved and Compared"
 
 def compare_prices(quote):
