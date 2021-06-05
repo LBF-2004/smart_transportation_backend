@@ -7,7 +7,7 @@ import base64
 import email
 import re
 import parseprice
-
+import time
 
 def remove(body):
 
@@ -26,7 +26,13 @@ def getEmails(num=1):
     creds = None
     body = ''
     body_list  = []
-
+    f = open("timestamp.txt", "r")
+    previous_timestamp = f.read()
+    f.close()
+    timestamp = str(round(time.time()))
+    f = open("timestamp.txt", "w")
+    f.write(timestamp)
+    f.close()
     # The file token.pickle contains the user access token.
     # Check if it exists
     if os.path.exists('token.pickle'):
@@ -50,7 +56,7 @@ def getEmails(num=1):
     service = build('gmail', 'v1', credentials=creds)
 
     # request a list of all the messages
-    result = service.users().messages().list(userId='me', maxResults=num,labelIds = ['INBOX']).execute()
+    result = service.users().messages().list(userId='me', q= "in: after:" + previous_timestamp).execute()
 
     # We can also pass maxResults to get any number of emails. Like this:
     # result = service.users().messages().list(maxResults=200, userId='me').execute()
@@ -59,43 +65,48 @@ def getEmails(num=1):
     # messages is a list of dictionaries where each dictionary contains a message id.
 
     # iterate through all the messages
-    for i,msg in enumerate(messages):
-        # Get the message from its id
-        info = []
-        txt = service.users().messages().get(userId='me', id=msg['id'], format="full").execute()
-        print(txt)
-        # Use try-except to avoid any Errors
-        try:
-            # Get value of 'payload' from dictionary 'txt'
-            payload = txt['payload']
-            headers = payload['headers']
+    info = []
+    if messages != None:
 
-            # Look for Subject and Sender Email in the headers
-            for d in headers:
-                if d['name'] == 'Subject':
-                    subject = d['value']
-                if d['name'] == 'From':
-                    sender = d['value']
+        for i,msg in enumerate(messages):
+            # Get the message from its id
 
-            # The Body of the message is in Encrypted format. So, we have to decode it.
-            # Get the data and decode it with base 64 decoder.
-            parts = payload.get('parts')[0]
-            data = parts['body']['data']
-            data = data.replace("-", "+").replace("_", "/")
+            txt = service.users().messages().get(userId='me', id=msg['id'], format="full").execute()
+            print(txt)
+            # Use try-except to avoid any Errors
+            try:
+                # Get value of 'payload' from dictionary 'txt'
+                payload = txt['payload']
+                headers = payload['headers']
 
-            # Now, the data obtained is in lxml. So, we will parse
-            # it with BeautifulSoup library
+                # Look for Subject and Sender Email in the headers
+                for d in headers:
+                    if d['name'] == 'Subject':
+                        subject = d['value']
+                    if d['name'] == 'From':
+                        sender = d['value']
 
-            msg = base64.urlsafe_b64decode(data.encode('UTF8'))
-            body = str(email.message_from_bytes(msg))
-            # print(email.message_from_bytes(msg))
-            body_list= body.split("\n")
-        #    service.users().messages().modify(userId='me', id=msg['id'], body = {'removeLabelIds': ['UNREAD']}).execute()
+                # The Body of the message is in Encrypted format. So, we have to decode it.
+                # Get the data and decode it with base 64 decoder.
+                parts = payload.get('parts')[0]
+                data = parts['body']['data']
+                data = data.replace("-", "+").replace("_", "/")
 
-        except Exception as e:
-            print(e)
-            continue
-        info.append((sender, subject, body_list))
+                # Now, the data obtained is in lxml. So, we will parse
+                # it with BeautifulSoup library
+
+                msg = base64.urlsafe_b64decode(data.encode('UTF8'))
+                body = str(email.message_from_bytes(msg))
+                # print(email.message_from_bytes(msg))
+                body_list= body.split("\n")
+                print(body)
+                body_list = list(filter(None, body_list))
+            #    service.users().messages().modify(userId='me', id=msg['id'], body = {'removeLabelIds': ['UNREAD']}).execute()
+
+            except Exception as e:
+                print(e)
+                continue
+            info.append((sender, subject, body_list))
     return info
 
 
@@ -107,16 +118,17 @@ def is_git_freight_quote_subject(subject):
   else:
     return True
 
-def get_major_minor_ids(subject):
+def get_major_minor_user_ids(subject):
   ID1 = subject.split("#")
   major_ID = ID1[1]
+  userID = ID1[0][:3]
   major_ID1 = major_ID.split("-")
   ID2 = major_ID.split("-")
   minor_ID = ID2[1]
   # subject.split("#")
   # split("-")
 
-  return [major_ID1[0], minor_ID]
+  return [major_ID1[0], minor_ID, userID]
 
 # TODO
 # 1. getEmails bug fix
@@ -125,7 +137,7 @@ def get_major_minor_ids(subject):
 # 4. periodic runner with timestamp to keep loading the emails
 # 5. update the API to get the quote data with best pricing algorithm
 
-emails = getEmails(2) # here is the bug
+emails = getEmails() # here is the bug
 print(emails)
 print("Total emails: ", len(emails))
 for a in emails:

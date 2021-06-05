@@ -4,14 +4,14 @@ from flask_cors import CORS
 import time
 import json
 import requests
-
+import ParseEmails
 
 app = Flask(__name__)
 CORS(app)
 
 zip_city = {}
 
-a = open("City_Price/Zip", "r")
+a = open("zip.csv", "r")
 for x in a.readlines():
     zip = x.split(",")
     zip_city[str(zip[0])] = zip[1].rstrip()
@@ -26,7 +26,7 @@ def find_city(zipcode):
 
 lax_price = {}
 
-f = open("City_Price/lax_price", "r")
+f = open("lax_price.csv", "r")
 for line in f.readlines():
     items = line.split(",")
     # print(items[0], items[1]) # Key Value
@@ -36,7 +36,7 @@ for line in f.readlines():
 
 texas_price = {}
 
-g = open("City_Price/tx_price", "r")
+g = open("tx_price.csv", "r")
 for a in g.readlines():
     data = a.split(",")
     texas_price[data[0]] = float((data[1]))
@@ -44,7 +44,7 @@ for a in g.readlines():
 
 okc_price = {}
 
-h = open("City_Price/okc_price", "r")
+h = open("okc_price.csv", "r")
 for b in h.readlines():
     info = b.split(",")
     okc_price[info[0]] = float((info[1]))
@@ -143,16 +143,54 @@ user_db = {
         "email": "newuser@gmail.com",
         "id": "user001",
     },
-    "leo@gmail.com": {
+    "leoliaobofei20041217@gmail.com": {
         "password": "12345",
         "first_name": "Leo",
         "last_name": "Liao",
         "phone": "2224",
-        "email": "leo@gmail.com",
-        "id": "002",
+        "email": "leoliaobofei20041217@gmail.com",
+        "id": "001",
         "quotes": []
+
+
+
+
+
+
+
+
+
+
     }
 }
+def saved_quote_email():
+    emails = ParseEmails.getEmails()  # here is the bug
+    print(emails)
+    print("Total emails: ", len(emails))
+    for a in emails:
+        subject = a[1]
+        if ParseEmails.is_git_freight_quote_subject(subject):
+            result = {}
+            result_price = ParseEmails.parseprice.extractPrice(a[2])
+            # print ("Test", b)
+            for h in result_price:
+                if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h[
+                    'DETAIL'].lower():
+                    result = h
+            Major_ID = ParseEmails.get_major_minor_user_ids(subject)[0]
+            Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
+            userID = ParseEmails.get_major_minor_user_ids(subject)[2]
+            for key, value in user_db.items():
+                if value["id"] == userID:
+                    for i in range (user_db[key][value]["quotes"]):
+                        if user_db[key][value]["quotes"][i]["quoteID"] == Major_ID:
+                            user_db[key][value]["quotes"][i]["result"][Minor_ID] = result
+    return "Quote Saved"
+
+
+
+
+
 
 
 # sign up
@@ -196,9 +234,22 @@ def login(email_adress, password):
 # login("liao@edu", "12345")
 
 email_list = [
-    "leoliaobofei20041217@gmail.com",
-    "yu.sun.cs@gmail.com",
-    "zhangling1729@gmail.com"
+    {
+        "id": "001",
+        "email": "leoliaobofei20041217@gmail.com",
+        "name": "Leo Transportation Inc."
+    },
+    {
+        "id": "002",
+        "email": "yu.sun.cs@gmail.com",
+        "name": "Yu sun"
+    },
+    {
+        "id": "003",
+        "email": "zhangling1729@gmail.com",
+        "name": "Zhangling"
+    }
+
 ]
 
 
@@ -210,9 +261,9 @@ def send_quote_emails(quote_data):
             "https://api.mailgun.net/v3/mail.gitfreight.com/messages",
             auth=("api", "57f394120fe10bf3ad3b675cc9f7054c-29561299-e12f4399"),
             data={"from": "Rachael <rachael@gitfreight.com>",
-                  "to": [email_list[i]],
-                  "subject": "GitFreight Quote Request #" + quote_data["quoteId"],
-                  "text": "To whom it may concern, \n" +
+                  "to": [email_list[i]["email"]],
+                  "subject": quote_data["userID"] + "GitFreight Quote Request #" + quote_data["quoteId"] + "-" + email_list[i]["id"],
+                  "text": "To whotm it may concern, \n" +
 
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
 
@@ -247,13 +298,14 @@ def send_quote_emails(quote_data):
 def submit_quote(org_city, des_city, container_count, item_description, email_adress):
     current_time = time.time()
     quote_data = {
-        "quoteId": current_time,
+        "userID" : user_db[email_adress]["id"],
+        "quoteId": str(int(current_time)),
         "org_city": org_city,
         "des_city": des_city,
         "container_count": container_count,
         "item_description": item_description,
         "current time": current_time,
-        "result": "na"
+        "result": {},
     }
     user_db[email_adress]["quotes"].append(quote_data)
 
@@ -293,9 +345,7 @@ def list_all_my_quotes(email_adress):
     # return all the quotes as a list from the users' record
 
     return json.dumps(user_db[email_adress]["quotes"])
-# Total price: $50
-# Other additional: $40
-# other price: $20
+saved_quote_email()
 
 
 app.run(host='0.0.0.0')
