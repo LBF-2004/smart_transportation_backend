@@ -7,8 +7,6 @@ import requests
 import ParseEmails
 import statistics
 
-app = Flask(__name__)
-CORS(app)
 
 zip_city = {}
 
@@ -58,7 +56,7 @@ line_haul = {"tx": texas_price, "la": lax_price, "okc": okc_price}
 # print(line_haul["lax"]["ALHAMBRA"])
 
 
-@app.route("/get_price/<org_city>/<des_city>/<container_count>")
+
 def get_price(org_city, des_city, container_count):
     # line_haul
     if org_city.isdigit():
@@ -196,6 +194,7 @@ def saved_quote_email():
             Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
             userID = ParseEmails.get_major_minor_user_ids(subject)[2]
             for key, value in user_db.items():
+                print(value)
                 if value["id"] == userID:
                     for i in range (user_db[key][value]["quotes"]):
                         if user_db[key][value]["quotes"][i]["quoteID"] == Major_ID:
@@ -209,11 +208,6 @@ def compare_prices(quote):
     return final_price
 
 
-
-# sign up
-@app.route(
-    "/signup/<email_adress>/<password>/<first_name>/<last_name>/<phone>/<company>"
-)
 def signup(email_adress, password, first_name, last_name, phone, company):
     email_adress = email_adress.lower()
     if email_adress not in user_db:
@@ -233,7 +227,7 @@ def signup(email_adress, password, first_name, last_name, phone, company):
 
 
 # login
-@app.route("/login/<email_adress>/<password>")
+
 def login(email_adress, password):
     email_adress = email_adress.lower()
     if email_adress in user_db:
@@ -310,8 +304,7 @@ def send_quote_emails(quote_data):
         print(result)
 
 
-@app.route(
-    "/submit_quote/<org_city>/<des_city>/<container_count>/<email_adress>/<item_description>")
+
 def submit_quote(org_city, des_city, container_count, item_description, email_adress):
     current_time = time.time()
     quote_data = {
@@ -357,15 +350,16 @@ def submit_quote(org_city, des_city, container_count, item_description, email_ad
     # return str(line_haul[org_city][des_city] * container_count)
 
 
-@app.route("/list_all_my_quotes/<email_adress>")
+
 def list_all_my_quotes(email_adress):
     # return all the quotes as a list from the users' record
 
     return json.dumps(user_db[email_adress]["quotes"])
 
+saved_quote_email()
+print(user_db["leoliaobofei20041217@gmail.com"])
 
 
-app.run(host='0.0.0.0')
 # print (user_db)
 
 # change in functioning needs to be done at "def"

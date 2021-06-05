@@ -137,22 +137,4 @@ def get_major_minor_user_ids(subject):
 # 4. periodic runner with timestamp to keep loading the emails
 # 5. update the API to get the quote data with best pricing algorithm
 
-emails = getEmails() # here is the bug
-print(emails)
-print("Total emails: ", len(emails))
-for a in emails:
-
-    subject = a[1]
-    print ("subject:",subject)
-    print(is_git_freight_quote_subject(subject))
-    if is_git_freight_quote_subject(subject):
-        result = {}
-        b = parseprice.extractPrice(a[2])
-        # print ("Test", b)
-        for h in b:
-            if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h['DETAIL'].lower():
-                result = h
-        result['Major_ID'] = get_major_minor_ids(subject)[0]
-        result['Minor_ID'] = get_major_minor_ids(subject)[1]
-        print(result)
 
