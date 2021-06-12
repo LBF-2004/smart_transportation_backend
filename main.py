@@ -136,7 +136,7 @@ user_db = {
             "current time": 162123254223
         }]
     },
-    "user1@gmail.com": "test555",
+
     "newuser@gmail.com": {
         "password": "test123",
         "name": "Leo Liao",
@@ -153,31 +153,24 @@ user_db = {
         "id": "001",
         "quotes": [
             {
-        "userID" : "001",
-        "quoteId": "2424708511",
-        "org_city": "PEK",
-        "des_city": "Shanghai",
-        "container_count": "3",
-        "item_description": "APPLE",
-        "current time": "23234423",
-        "result": "na",
-        "list_prices": {
-            "123" : "67"
-        }
+                "userID": "001",
+                "quoteId": "2424708511",
+                "org_city": "PEK",
+                "des_city": "Shanghai",
+                "container_count": "3",
+                "item_description": "APPLE",
+                "current time": "23234423",
+                "result": "67",
+                "list_prices": {
+                    "123": "67"
+                }
             }
         ]
 
-
-
-
-
-
-
-
-
-
     }
 }
+
+
 def saved_quote_email():
     emails = ParseEmails.getEmails()  # here is the bug
     print(emails)
@@ -185,23 +178,25 @@ def saved_quote_email():
     for a in emails:
         subject = a[1]
         if ParseEmails.is_git_freight_quote_subject(subject):
-            result = {}
+            result = 'na'
             result_price = ParseEmails.parseprice.extractPrice(a[2])
             # print ("Test", b)
             for h in result_price:
                 if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h[
                     'DETAIL'].lower():
-                    result = h
+                    result = float(h['PRICE'].replace('$', '').strip())
             Major_ID = ParseEmails.get_major_minor_user_ids(subject)[0]
             Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
             userID = ParseEmails.get_major_minor_user_ids(subject)[2]
             for key, value in user_db.items():
+                # print(value)
                 if value["id"] == userID:
-                    for i in range (user_db[key][value]["quotes"]):
-                        if user_db[key][value]["quotes"][i]["quoteID"] == Major_ID:
-                            user_db[key][value]["quotes"][i]["list_prices"][Minor_ID] = result
-                            compare_prices(user_db[key][value]["quotes"][i]["list_prices"])
+                    for quote in (value["quotes"]):
+                        if quote["quoteId"] == Major_ID:
+                            quote["list_prices"][Minor_ID] = result
+                            quote['result'] = compare_prices(quote["list_prices"])
     return "New Quotes Saved and Compared"
+
 
 def compare_prices(quote):
     prices = quote.value()
@@ -209,20 +204,19 @@ def compare_prices(quote):
     return final_price
 
 
-
 # sign up
 @app.route(
     "/signup/<email_adress>/<password>/<first_name>/<last_name>/<phone>/<company>"
 )
-def signup(email_adress, password, first_name, last_name, phone, company):
-    email_adress = email_adress.lower()
-    if email_adress not in user_db:
-        user_db[email_adress] = {
+def signup(email_address, password, first_name, last_name, phone, company):
+    email_address = email_address.lower()
+    if email_address not in user_db:
+        user_db[email_address] = {
             "password": password,
             "first_name": first_name,
             "last_name": last_name,
             "phone": phone,
-            "email": email_adress,
+            "email": email_address,
             "company": company,
             "quotes": []
         }
@@ -279,7 +273,8 @@ def send_quote_emails(quote_data):
             auth=("api", "57f394120fe10bf3ad3b675cc9f7054c-29561299-e12f4399"),
             data={"from": "Rachael <rachael@gitfreight.com>",
                   "to": [email_list[i]["email"]],
-                  "subject": quote_data["userID"] + "GitFreight Quote Request #" + quote_data["quoteId"] + "-" + email_list[i]["id"],
+                  "subject": quote_data["userID"] + "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
+                             email_list[i]["id"],
                   "text": "To whotm it may concern, \n" +
 
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
@@ -315,7 +310,7 @@ def send_quote_emails(quote_data):
 def submit_quote(org_city, des_city, container_count, item_description, email_adress):
     current_time = time.time()
     quote_data = {
-        "userID" : user_db[email_adress]["id"],
+        "userID": user_db[email_adress]["id"],
         "quoteId": str(int(current_time)),
         "org_city": org_city,
         "des_city": des_city,
@@ -364,7 +359,6 @@ def list_all_my_quotes(email_adress):
     return json.dumps(user_db[email_adress]["quotes"])
 
 
-
 app.run(host='0.0.0.0')
 # print (user_db)
 
@@ -390,6 +384,3 @@ app.run(host='0.0.0.0')
 # def find_zipcode_inv(cityname):
 
 # type of data is IMPORTANT!!!
-
-
-

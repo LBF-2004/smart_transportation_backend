@@ -9,8 +9,8 @@ import re
 import parseprice
 import time
 
-def remove(body):
 
+def remove(body):
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
 
     body = body.replace('\n', " ")
@@ -25,7 +25,7 @@ def getEmails(num=1):
     SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
     creds = None
     body = ''
-    body_list  = []
+    body_list = []
     f = open("timestamp.txt", "r")
     previous_timestamp = f.read()
     f.close()
@@ -56,7 +56,7 @@ def getEmails(num=1):
     service = build('gmail', 'v1', credentials=creds)
 
     # request a list of all the messages
-    result = service.users().messages().list(userId='me', q= "in: after:" + previous_timestamp).execute()
+    result = service.users().messages().list(userId='me', q="in: after:" + previous_timestamp).execute()
 
     # We can also pass maxResults to get any number of emails. Like this:
     # result = service.users().messages().list(maxResults=200, userId='me').execute()
@@ -68,7 +68,7 @@ def getEmails(num=1):
     info = []
     if messages != None:
 
-        for i,msg in enumerate(messages):
+        for i, msg in enumerate(messages):
             # Get the message from its id
 
             txt = service.users().messages().get(userId='me', id=msg['id'], format="full").execute()
@@ -98,7 +98,7 @@ def getEmails(num=1):
                 msg = base64.urlsafe_b64decode(data.encode('UTF8'))
                 body = str(email.message_from_bytes(msg))
                 # print(email.message_from_bytes(msg))
-                body_list= body.split("\n")
+                body_list = body.split("\n")
                 print(body)
                 body_list = list(filter(None, body_list))
             #    service.users().messages().modify(userId='me', id=msg['id'], body = {'removeLabelIds': ['UNREAD']}).execute()
@@ -111,24 +111,25 @@ def getEmails(num=1):
 
 
 def is_git_freight_quote_subject(subject):
-  re2 = "#[0-9]{10}-[0-9]{3}"
-  a = re.findall(re2, subject)
-  if len(a) == 0:
-    return False
-  else:
-    return True
+    re2 = "#[0-9]{10}-[0-9]{3}"
+    a = re.findall(re2, subject)
+    if len(a) == 0:
+        return False
+    else:
+        return True
+
 
 def get_major_minor_user_ids(subject):
-  ID1 = subject.split("#")
-  major_ID = ID1[1]
-  userID = ID1[0][:3]
-  major_ID1 = major_ID.split("-")
-  ID2 = major_ID.split("-")
-  minor_ID = ID2[1]
-  # subject.split("#")
-  # split("-")
+    ID1 = subject.split("#")
+    major_ID = ID1[1]
+    userID = ID1[0][:3]
+    major_ID1 = major_ID.split("-")
+    ID2 = major_ID.split("-")
+    minor_ID = ID2[1]
+    # subject.split("#")
+    # split("-")
 
-  return [major_ID1[0], minor_ID, userID]
+    return [major_ID1[0], minor_ID, userID]
 
 # TODO
 # 1. getEmails bug fix
@@ -136,5 +137,3 @@ def get_major_minor_user_ids(subject):
 # 3. write the quote results back to the DB
 # 4. periodic runner with timestamp to keep loading the emails
 # 5. update the API to get the quote data with best pricing algorithm
-
-
