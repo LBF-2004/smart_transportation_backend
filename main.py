@@ -182,6 +182,7 @@ def saved_quote_email():
     print("Total emails: ", len(emails))
     for a in emails:
         subject = a[1]
+        print(ParseEmails.is_git_freight_quote_subject(subject), subject)
         if ParseEmails.is_git_freight_quote_subject(subject):
             result = 'na'
             result_price = ParseEmails.parseprice.extractPrice(a[2])
@@ -199,19 +200,25 @@ def saved_quote_email():
                     for quote in (value["quotes"]):
                         if quote["quoteId"] == Major_ID:
                             quote["list_prices"][Minor_ID] = result
+                            print(result)
                             quote['result'] = compare_prices(quote["list_prices"])
     return "New Quotes Saved and Compared"
 
 
 def compare_prices(quote):
-    print('quotes: ', quote)
-    prices = quote.values()
+    prices = list(quote.values())
+    if len(prices) % 2 == 0:
+        prices.sort()
+        mid = (len(prices) // 2)
+        print(mid)
+        return prices[mid]
+    print(prices)
     final_price = str(statistics.median(prices))
     return final_price
 
 
 @app.route(
-    "/signup/<email_adress>/<password>/<first_name>/<last_name>/<phone>/<company>"
+    "/signup/<email_address>/<password>/<first_name>/<last_name>/<phone>/<company>"
 )
 def signup(email_address, password, first_name, last_name, phone, company):
     email_address = email_address.lower()
@@ -220,6 +227,7 @@ def signup(email_address, password, first_name, last_name, phone, company):
         num = len(user_db)
         num = str(num)
         user_id = user_id[:-len(num)] + num
+        print (user_id)
         user_db[email_address] = {
             "password": password,
             "first_name": first_name,
@@ -233,6 +241,7 @@ def signup(email_address, password, first_name, last_name, phone, company):
 
     else:
         return "Email already exists."
+    print(user_db)
     return "OK"
 
 
@@ -240,6 +249,7 @@ def signup(email_address, password, first_name, last_name, phone, company):
 @app.route("/login/<email_adress>/<password>")
 def login(email_adress, password):
     email_adress = email_adress.lower()
+    print (email_adress + password)
     if email_adress in user_db:
         if user_db[email_adress]["password"] == password:
             print("Correct")
@@ -269,6 +279,11 @@ email_list = [
         "id": "003",
         "email": "zhangling1729@gmail.com",
         "name": "Zhangling"
+    },
+    {
+        "id": "004",
+        "email": "marisabelchang@gmail.com",
+        'name': "Marisabel"
     }
 
 ]
@@ -316,11 +331,11 @@ def send_quote_emails(quote_data):
 
 
 @app.route(
-    "/submit_quote/<org_city>/<des_city>/<container_count>/<email_adress>/<item_description>")
-def submit_quote(org_city, des_city, container_count, item_description, email_adress):
+    "/submit_quote/<org_city>/<des_city>/<container_count>/<email_address>/<item_description>")
+def submit_quote(org_city, des_city, container_count, item_description, email_address):
     current_time = time.time()
     quote_data = {
-        "userID": user_db[email_adress]["id"],
+        "userID": user_db[email_address]["id"],
         "quoteId": str(int(current_time)),
         "org_city": org_city,
         "des_city": des_city,
@@ -328,8 +343,11 @@ def submit_quote(org_city, des_city, container_count, item_description, email_ad
         "item_description": item_description,
         "current time": current_time,
         "result": "na",
+        "list_prices": {
+
+        }
     }
-    user_db[email_adress]["quotes"].append(quote_data)
+    user_db[email_address]["quotes"].append(quote_data)
 
     # TODO: to process this quote
     # Follow a sequnce of startegies
@@ -339,8 +357,8 @@ def submit_quote(org_city, des_city, container_count, item_description, email_ad
     a = get_price(org_city, des_city, container_count)
     if a != "na":
         # move to 2)
-        lastindex = len(user_db[email_adress]["quotes"]) - 1
-        user_db[email_adress]["quotes"][lastindex]["result"] = a
+        lastindex = len(user_db[email_address]["quotes"]) - 1
+        user_db[email_address]["quotes"][lastindex]["result"] = a
         return "OK"
 
     # 2) Call the TTX API to get the price
@@ -368,7 +386,7 @@ def list_all_my_quotes(email_adress):
 
     return json.dumps(user_db[email_adress]["quotes"])
 
-scheduler.add_job(id=INTERVAL_TASK_ID, func=saved_quote_email, trigger='interval', seconds=60)
+scheduler.add_job(id=INTERVAL_TASK_ID, func=saved_quote_email, trigger='interval', seconds=2)
 app.run(host='0.0.0.0')
 # print (user_db)
 
