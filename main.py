@@ -6,10 +6,15 @@ import json
 import requests
 import ParseEmails
 import statistics
+from flask_apscheduler import APScheduler
 
 app = Flask(__name__)
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 CORS(app)
 
+INTERVAL_TASK_ID = 'interval-task-id'
 zip_city = {}
 
 a = open("City_Price/Zip", "r")
@@ -136,7 +141,6 @@ user_db = {
             "current time": 162123254223
         }]
     },
-
     "newuser@gmail.com": {
         "password": "test123",
         "name": "Leo Liao",
@@ -160,9 +164,9 @@ user_db = {
                 "container_count": "3",
                 "item_description": "APPLE",
                 "current time": "23234423",
-                "result": "67",
+                "result": "na",
                 "list_prices": {
-                    "123": "67"
+                    "123": 67
                 }
             }
         ]
@@ -173,7 +177,7 @@ user_db = {
 
 def saved_quote_email():
     emails = ParseEmails.getEmails()  # here is the bug
-    print(emails)
+    # print(emails)
     print("Total emails: ", len(emails))
     for a in emails:
         subject = a[1]
@@ -199,7 +203,8 @@ def saved_quote_email():
 
 
 def compare_prices(quote):
-    prices = quote.value()
+    print('quotes: ', quote)
+    prices = quote.values()
     final_price = str(statistics.median(prices))
     return final_price
 
@@ -358,7 +363,7 @@ def list_all_my_quotes(email_adress):
 
     return json.dumps(user_db[email_adress]["quotes"])
 
-
+scheduler.add_job(id=INTERVAL_TASK_ID, func=saved_quote_email, trigger='interval', seconds=2)
 app.run(host='0.0.0.0')
 # print (user_db)
 

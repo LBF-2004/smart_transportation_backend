@@ -56,7 +56,7 @@ def getEmails(num=1):
     service = build('gmail', 'v1', credentials=creds)
 
     # request a list of all the messages
-    result = service.users().messages().list(userId='me', q="in: after:" + previous_timestamp).execute()
+    result = service.users().messages().list(userId='me',  q="in: after:" + previous_timestamp,labelIds = ['INBOX']).execute()
 
     # We can also pass maxResults to get any number of emails. Like this:
     # result = service.users().messages().list(maxResults=200, userId='me').execute()

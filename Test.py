@@ -158,7 +158,8 @@ user_db = {
                 "current time": "23234423",
                 "result": "na",
                 "list_prices": {
-                    "123": 67
+                    "123": 67,
+                    # "456": 50,
                 }
             }
         ]
@@ -176,6 +177,7 @@ def saved_quote_email():
         if ParseEmails.is_git_freight_quote_subject(subject):
             result = 'na'
             result_price = ParseEmails.parseprice.extractPrice(a[2])
+            print(result_price)
             # print ("Test", b)
             for h in result_price:
                 if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h[
@@ -195,7 +197,12 @@ def saved_quote_email():
 
 
 def compare_prices(quote):
-    prices = quote.values()
+    prices = list(quote.values())
+    if len(prices) % 2 == 0:
+        prices.sort()
+        mid = (len(prices) // 2)
+        print(mid)
+        return prices[mid]
     print(prices)
     final_price = str(statistics.median(prices))
     return final_price
@@ -352,27 +359,7 @@ def list_all_my_quotes(email_adress):
 saved_quote_email()
 print(user_db["leoliaobofei20041217@gmail.com"])
 
-# print (user_db)
-
-# change in functioning needs to be done at "def"
-# while(True):
-#  find_city(zipcode=int(input()))
-
-# zip_city_inv = {   }
-
-# b = open("zip.csv", "r")
-# for y in b.readlines():
-#   code = y.split(",")
-#   zip_city_inv[str(code[1])]= [int(code[0])]
-# def find_zipcode(cityname):
-#   for n in zip_city_inv:
-#     if n[0] in zip_city_inv:
-#       zip_city_inv[n[0]].append(n[1])
-#       print(zip_city_inv[cityname])
-#     else:
-#       print ("invalid cityname")
-# find_zipcode(str(input())
-
-# def find_zipcode_inv(cityname):
-
-# type of data is IMPORTANT!!!
+user_id = '000'
+num = len(user_db)
+num = str(num)
+print(user_id[:-len(num)] + num)
