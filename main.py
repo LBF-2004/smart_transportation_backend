@@ -8,6 +8,7 @@ import ParseEmails
 import statistics
 from flask_apscheduler import APScheduler
 
+
 app = Flask(__name__)
 scheduler = APScheduler()
 scheduler.init_app(app)
@@ -128,7 +129,7 @@ user_db = {
         "email":
             "yusun@gmail.com",
         "id":
-            "user002",
+            "001",
         "quotes": [{
             "org_city": "lax",
             "des_city": "des",
@@ -146,7 +147,7 @@ user_db = {
         "name": "Leo Liao",
         "phone": "3451233434",
         "email": "newuser@gmail.com",
-        "id": "user001",
+        "id": "002",
     },
     "leoliaobofei20041217@gmail.com": {
         "password": "12345",
@@ -154,10 +155,10 @@ user_db = {
         "last_name": "Liao",
         "phone": "2224",
         "email": "leoliaobofei20041217@gmail.com",
-        "id": "001",
+        "id": "003",
         "quotes": [
             {
-                "userID": "001",
+                "userID": "003",
                 "quoteId": "2424708511",
                 "org_city": "PEK",
                 "des_city": "Shanghai",
@@ -209,13 +210,16 @@ def compare_prices(quote):
     return final_price
 
 
-# sign up
 @app.route(
     "/signup/<email_adress>/<password>/<first_name>/<last_name>/<phone>/<company>"
 )
 def signup(email_address, password, first_name, last_name, phone, company):
     email_address = email_address.lower()
     if email_address not in user_db:
+        user_id = '000'
+        num = len(user_db)
+        num = str(num)
+        user_id = user_id[:-len(num)] + num
         user_db[email_address] = {
             "password": password,
             "first_name": first_name,
@@ -223,7 +227,8 @@ def signup(email_address, password, first_name, last_name, phone, company):
             "phone": phone,
             "email": email_address,
             "company": company,
-            "quotes": []
+            "quotes": [],
+            "id": user_id
         }
 
     else:
@@ -278,8 +283,8 @@ def send_quote_emails(quote_data):
             auth=("api", "57f394120fe10bf3ad3b675cc9f7054c-29561299-e12f4399"),
             data={"from": "Rachael <rachael@gitfreight.com>",
                   "to": [email_list[i]["email"]],
-                  "subject": quote_data["userID"] + "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
-                             email_list[i]["id"],
+                  "subject":  "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
+                             email_list[i]["id"] + "-" + quote_data["userID"],
                   "text": "To whotm it may concern, \n" +
 
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
@@ -363,7 +368,7 @@ def list_all_my_quotes(email_adress):
 
     return json.dumps(user_db[email_adress]["quotes"])
 
-scheduler.add_job(id=INTERVAL_TASK_ID, func=saved_quote_email, trigger='interval', seconds=2)
+scheduler.add_job(id=INTERVAL_TASK_ID, func=saved_quote_email, trigger='interval', seconds=60)
 app.run(host='0.0.0.0')
 # print (user_db)
 

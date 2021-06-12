@@ -111,7 +111,7 @@ def getEmails(num=1):
 
 
 def is_git_freight_quote_subject(subject):
-    re2 = "#[0-9]{10}-[0-9]{3}"
+    re2 = "#[0-9]{10}-[0-9]{3}-[0-9]{3}"
     a = re.findall(re2, subject)
     if len(a) == 0:
         return False
@@ -122,10 +122,10 @@ def is_git_freight_quote_subject(subject):
 def get_major_minor_user_ids(subject):
     ID1 = subject.split("#")
     major_ID = ID1[1]
-    userID = ID1[0][:3]
     major_ID1 = major_ID.split("-")
     ID2 = major_ID.split("-")
     minor_ID = ID2[1]
+    userID = ID2[2]
     # subject.split("#")
     # split("-")
 
