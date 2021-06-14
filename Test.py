@@ -120,7 +120,7 @@ user_db = {
         "email":
             "yusun@gmail.com",
         "id":
-            "user002",
+            "001",
         "quotes": [{
             "org_city": "lax",
             "des_city": "des",
@@ -138,7 +138,7 @@ user_db = {
         "name": "Leo Liao",
         "phone": "3451233434",
         "email": "newuser@gmail.com",
-        "id": "user001",
+        "id": "002",
     },
     "leoliaobofei20041217@gmail.com": {
         "password": "12345",
@@ -146,10 +146,10 @@ user_db = {
         "last_name": "Liao",
         "phone": "2224",
         "email": "leoliaobofei20041217@gmail.com",
-        "id": "001",
+        "id": "003",
         "quotes": [
             {
-                "userID": "001",
+                "userID": "003",
                 "quoteId": "2424708511",
                 "org_city": "PEK",
                 "des_city": "Shanghai",
@@ -161,7 +161,19 @@ user_db = {
                     "123": 67,
                     # "456": 50,
                 }
+            },
+            {
+                "userID": "003",
+                "quoteId": "1623535329",
+                "org_city": "PEK",
+                "des_city": "Shanghai",
+                "container_count": "3",
+                "item_description": "APPLE",
+                "current time": "23234423",
+                "result": "na",
+                "list_prices": {}
             }
+
         ]
 
     }
@@ -177,7 +189,7 @@ def saved_quote_email():
         if ParseEmails.is_git_freight_quote_subject(subject):
             result = 'na'
             result_price = ParseEmails.parseprice.extractPrice(a[2])
-            print(result_price)
+            # print(result_price)
             # print ("Test", b)
             for h in result_price:
                 if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h[
@@ -187,7 +199,7 @@ def saved_quote_email():
             Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
             userID = ParseEmails.get_major_minor_user_ids(subject)[2]
             for key, value in user_db.items():
-                # print(value)
+                print(value["id"] == userID)
                 if value["id"] == userID:
                     for quote in (value["quotes"]):
                         if quote["quoteId"] == Major_ID:
