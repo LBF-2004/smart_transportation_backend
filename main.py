@@ -64,31 +64,31 @@ line_haul = {"tx": texas_price, "la": lax_price, "okc": okc_price}
 # print(line_haul["lax"]["ALHAMBRA"])
 
 
-@app.route("/get_price/<org_city>/<des_city>/<container_count>")
-def get_price(org_city, des_city, container_count):
-    # line_haul
-    if org_city.isdigit():
-        org_city = find_city(org_city)
-    if des_city.isdigit():
-        des_city = find_city(des_city)
-
-    # It is possible that org_city or des_city is invalid
-    # or we cannot handle it, so we need to check the following 2 things before processing the request:
-    # 1) is org_city in the list of supported cities (e.g., lax, ock, etc.)
-    if org_city not in line_haul:
-        return "na"
-
-    # 2) is des_city in the dictionary we have for that city.
-    # If we cannot support it, we will need to return "na" right away
-    if des_city not in line_haul[org_city]:
-        return "na"
-
-    # if org_city or des_city is zipcode,
-    # then, we look up the zip dictionary and translate it into the city name
-
-    container_count = int(container_count)
-    # TODO: save the result to user's db under quotes
-    return str(line_haul[org_city][des_city] * container_count)
+# @app.route("/get_price/<org_city>/<des_city>/<container_count>")
+# def get_price(org_city, des_city, container_count):
+#     # line_haul
+#     if org_city.isdigit():
+#         org_city = find_city(org_city)
+#     if des_city.isdigit():
+#         des_city = find_city(des_city)
+#
+#     # It is possible that org_city or des_city is invalid
+#     # or we cannot handle it, so we need to check the following 2 things before processing the request:
+#     # 1) is org_city in the list of supported cities (e.g., lax, ock, etc.)
+#     if org_city not in line_haul:
+#         return "na"
+#
+#     # 2) is des_city in the dictionary we have for that city.
+#     # If we cannot support it, we will need to return "na" right away
+#     if des_city not in line_haul[org_city]:
+#         return "na"
+#
+#     # if org_city or des_city is zipcode,
+#     # then, we look up the zip dictionary and translate it into the city name
+#
+#     container_count = int(container_count)
+#     # TODO: save the result to user's db under quotes
+#     return str(line_haul[org_city][des_city] * container_count)
 
 
 # review how to use and call function
@@ -289,7 +289,7 @@ email_list = [
 ]
 
 
-def send_quote_emails(quote_data):
+def send_FTL_quote_emails(quote_data):
     # for each email in the email_list,
     # send an email with the quote information
     for i in range(len(email_list)):  #
@@ -305,16 +305,15 @@ def send_quote_emails(quote_data):
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
 
                           "\nFrom: " + quote_data["org_city"] + "\n"
-                                                                "Service: Trucking" + "\n"
-                                                                                      "Quantity: " + quote_data[
-                              "container_count"] + "\n"
+                                                                "Service: FTL/LTL"  + "\n"
+                                                                                      
                                                    "Commondity: " + quote_data["item_description"] + "\n"
                                                                                                      "Delivery Adress: " +
                           quote_data["des_city"] + "\n"
 
                                                    "\nNote: \n" +
 
-                          "Commericial area/ need lift gate" + "\n"
+                          quote_data["additional_need"] + "\n"
 
                                                                "\nThank you," + "\n"
                                                                                 "Rachael Zhang" + "\n"
@@ -330,16 +329,69 @@ def send_quote_emails(quote_data):
         print(result)
 
 
+def send_FCL_quote_emails(quote_data):
+    # for each email in the email_list,
+    # send an email with the quote information
+    for i in range(len(email_list)):  #
+        result = requests.post(
+            "https://api.mailgun.net/v3/mail.gitfreight.com/messages",
+            auth=("api", "57f394120fe10bf3ad3b675cc9f7054c-29561299-e12f4399"),
+            data={"from": "Rachael <rachael@gitfreight.com>",
+                  "to": [email_list[i]["email"]],
+                  "subject": "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
+                             email_list[i]["id"] + "-" + quote_data["userID"],
+                  "text": "To whotm it may concern, \n" +
+
+                          "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
+
+                          "\nFrom: " + quote_data["org_city"] + "\n"
+                                                                "Service: FCL" + "\n"
+                                                        
+
+                                                                                     "Commondity: " + quote_data[
+                              "item_description"] + "\n"
+                                                    "Delivery Address: " +
+                          quote_data["des_city"] + "\n"
+                                                   + quote_data["containerType"] + "\n"
+
+                                                   "\nNote: \n" +
+
+                          quote_data["additional_need"] + "\n"
+
+                                                          "\nThank you," + "\n"
+                                                                           "Rachael Zhang" + "\n"
+
+                                                                                             "\nGlobal Intertrans \n" +
+                          "1300 Valley Vista, Dr 205A, \n" +
+                          "Diamond Bar CA 91765 \n" +
+                          "Tel: 1-909-345-7587 \n" +
+                          "Fax: 1-909-345-7589 \n" +
+                          "Web site: www.globalintertrans.com \n" +
+                          "Email: Rachael@globalintertrans.com \n"
+                  })
+        print(result)
+
+
+
+
+
 @app.route(
-    "/submit_quote/<org_city>/<des_city>/<container_count>/<email_address>/<item_description>")
-def submit_quote(org_city, des_city, container_count, item_description, email_address):
+    "/submit_FTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<length>/<width>/<height>/<weight>/<LWH_unit>/<weight_unit>?<additional_need>")
+def submit_FTL_quote(org_city, des_city, item_description, email_address, length, width, height, weight,LWH_unit, weight_unit, additional_need):
     current_time = time.time()
     quote_data = {
         "userID": user_db[email_address]["id"],
         "quoteId": str(int(current_time)),
+        "trucking_service" : "FTL/LTL",
+        "length" : length,
+        "width" : width,
+        "height" : height,
+        "weight" : weight,
+        "LWH_unit" : LWH_unit,
+        "weight_unit" : weight_unit,
+        "additional_need": additional_need,
         "org_city": org_city,
         "des_city": des_city,
-        "container_count": container_count,
         "item_description": item_description,
         "current time": current_time,
         "result": "na",
@@ -347,6 +399,7 @@ def submit_quote(org_city, des_city, container_count, item_description, email_ad
 
         }
     }
+
     user_db[email_address]["quotes"].append(quote_data)
 
     # TODO: to process this quote
@@ -354,18 +407,18 @@ def submit_quote(org_city, des_city, container_count, item_description, email_ad
     # 1) Try the port query table (get_price)
     #  if 1) returns na, we will move to 2)
     #  if 1) returns the price, we will update the result right away, and finish this function
-    a = get_price(org_city, des_city, container_count)
-    if a != "na":
-        # move to 2)
-        lastindex = len(user_db[email_address]["quotes"]) - 1
-        user_db[email_address]["quotes"][lastindex]["result"] = a
-        return "OK"
+    #a = get_price(org_city, des_city, container_count)
+    # if a != "na":
+    #     # move to 2)
+    #     lastindex = len(user_db[email_address]["quotes"]) - 1
+    #     user_db[email_address]["quotes"][lastindex]["result"] = a
+    #     return "OK"
 
     # 2) Call the TTX API to get the price
     #  if 2) returns na, we will move to 3)
     # 3) Send email and wait for the reply
     #  send the email and wait
-    send_quote_emails(quote_data)
+    send_FTL_quote_emails(quote_data)
 
     return "OK"
 
@@ -378,6 +431,46 @@ def submit_quote(org_city, des_city, container_count, item_description, email_ad
     # container_count = int(container_count)
     # TODO: save the result to user's db under quotes
     # return str(line_haul[org_city][des_city] * container_count)
+
+
+@app.route(
+    "/submit_FCL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<container_type>")
+def submit_FCL_quote(org_city, des_city, item_description, email_address, container_type):
+    current_time = time.time()
+    quote_data = {
+        "userID": user_db[email_address]["id"],
+        "quoteId": str(int(current_time)),
+        "trucking_service" : "FCL",
+        "container_type": container_type,
+        "org_city": org_city,
+        "des_city": des_city,
+        "item_description": item_description,
+        "current time": current_time,
+        "result": "na",
+        "list_prices": {
+        }
+    }
+
+    user_db[email_address]["quotes"].append(quote_data)
+
+    # TODO: to process this quote
+    # Follow a sequnce of startegies
+    # 1) Try the port query table (get_price)
+    #  if 1) returns na, we will move to 2)
+    #  if 1) returns the price, we will update the result right away, and finish this function
+    # a = get_price(org_city, des_city)
+    # if a != "na":
+    #     # move to 2)
+    #     lastindex = len(user_db[email_address]["quotes"]) - 1
+    #     user_db[email_address]["quotes"][lastindex]["result"] = a
+    #     return "OK"
+
+    # 2) Call the TTX API to get the price
+    #  if 2) returns na, we will move to 3)
+    # 3) Send email and wait for the reply
+    #  send the email and wait
+    send_FCL_quote_emails(quote_data)
+    return "OK"
 
 
 @app.route("/list_all_my_quotes/<email_adress>")
