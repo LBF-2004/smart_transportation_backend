@@ -199,7 +199,7 @@ def saved_quote_email():
                 if value["id"] == userID:
                     for quote in (value["quotes"]):
                         if quote["quoteId"] == Major_ID:
-                            quote["list_prices"][Minor_ID] = result
+                            quote["list_prices"][Minor_ID] = str(result)
                             print(result)
                             quote['result'] = compare_prices(quote["list_prices"])
     return "New Quotes Saved and Compared"
@@ -284,6 +284,11 @@ email_list = [
         "id": "004",
         "email": "marisabelchang@gmail.com",
         'name': "Marisabel"
+    },
+    {
+        "id":"005",
+        "email":"liaosong@hi-trust.com",
+        'name' : "Song"
     }
 
 ]
@@ -300,18 +305,21 @@ def send_FTL_quote_emails(quote_data):
                   "to": [email_list[i]["email"]],
                   "subject":  "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
                              email_list[i]["id"] + "-" + quote_data["userID"],
-                  "text": "To whotm it may concern, \n" +
+                  "text": "To whom it may concern, \n" +
 
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
 
                           "\nFrom: " + quote_data["org_city"] + "\n"
-                                                                "Service: FTL/LTL"  + "\n"
+                                                                "Service: FTL"  + "\n"
+                                    
                                                                                       
-                                                   "Commondity: " + quote_data["item_description"] + "\n"
-                                                                                                     "Delivery Adress: " +
+                                                   "Commondity: " + quote_data["item_description"] + "\n" +
+
+                                                                                                     "Delivery Address: " +
                           quote_data["des_city"] + "\n"
 
                                                    "\nNote: \n" +
+                           quote_data["destination_type"] + "\n" +
 
                           quote_data["additional_need"] + "\n"
 
@@ -319,6 +327,50 @@ def send_FTL_quote_emails(quote_data):
                                                                                 "Rachael Zhang" + "\n"
 
                                                                                                   "\nGlobal Intertrans \n" +
+                          "1300 Valley Vista, Dr 205A, \n" +
+                          "Diamond Bar CA 91765 \n" +
+                          "Tel: 1-909-345-7587 \n" +
+                          "Fax: 1-909-345-7589 \n" +
+                          "Web site: www.globalintertrans.com \n" +
+                          "Email: Rachael@globalintertrans.com \n"
+                  })
+        print(result)
+
+
+def send_LTL_quote_emails(quote_data):
+    # for each email in the email_list,
+    # send an email with the quote information
+    for i in range(len(email_list)):  #
+        result = requests.post(
+            "https://api.mailgun.net/v3/mail.gitfreight.com/messages",
+            auth=("api", "57f394120fe10bf3ad3b675cc9f7054c-29561299-e12f4399"),
+            data={"from": "Rachael <rachael@gitfreight.com>",
+                  "to": [email_list[i]["email"]],
+                  "subject": "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
+                             email_list[i]["id"] + "-" + quote_data["userID"],
+                  "text": "To whom it may concern, \n" +
+
+                          "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
+
+                          "\nFrom: " + quote_data["org_city"] + "\n"
+                                                                "Service: LTL" + "\n"
+
+
+                                                                                     "Commondity: " + quote_data[
+                              "item_description"] + "\n" +
+
+                          "Delivery Address: " +
+                          quote_data["des_city"] + "\n"
+
+                                                   "\nNote: \n" +
+                          quote_data["destination_type"] + "\n" +
+
+                          quote_data["additional_need"] + "\n"
+
+                                                          "\nThank you," + "\n"
+                                                                           "Rachael Zhang" + "\n"
+
+                                                                                             "\nGlobal Intertrans \n" +
                           "1300 Valley Vista, Dr 205A, \n" +
                           "Diamond Bar CA 91765 \n" +
                           "Tel: 1-909-345-7587 \n" +
@@ -340,7 +392,7 @@ def send_FCL_quote_emails(quote_data):
                   "to": [email_list[i]["email"]],
                   "subject": "GitFreight Quote Request #" + quote_data["quoteId"] + "-" +
                              email_list[i]["id"] + "-" + quote_data["userID"],
-                  "text": "To whotm it may concern, \n" +
+                  "text": "To whom it may concern, \n" +
 
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
 
@@ -376,19 +428,20 @@ def send_FCL_quote_emails(quote_data):
 
 
 @app.route(
-    "/submit_FTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<length>/<width>/<height>/<weight>/<LWH_unit>/<weight_unit>?<additional_need>")
-def submit_FTL_quote(org_city, des_city, item_description, email_address, length, width, height, weight,LWH_unit, weight_unit, additional_need):
+    "/submit_FTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<destination_type>/<length>/<height>/<width>/<weight>/<LWH_unit>/<weight_unit>/<additional_need>")
+def submit_FTL_quote(org_city, des_city, email_address,item_description, destination_type, length, height, width, weight, LWH_unit, weight_unit, additional_need):
     current_time = time.time()
     quote_data = {
         "userID": user_db[email_address]["id"],
         "quoteId": str(int(current_time)),
-        "trucking_service" : "FTL/LTL",
+        "trucking_service" : "FTL",
         "length" : length,
         "width" : width,
         "height" : height,
         "weight" : weight,
         "LWH_unit" : LWH_unit,
         "weight_unit" : weight_unit,
+        "destination_type" : destination_type,
         "additional_need": additional_need,
         "org_city": org_city,
         "des_city": des_city,
@@ -432,7 +485,53 @@ def submit_FTL_quote(org_city, des_city, item_description, email_address, length
     # TODO: save the result to user's db under quotes
     # return str(line_haul[org_city][des_city] * container_count)
 
+@app.route(
+    "/submit_LTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<destination_type>/<length>/<height>/<width>/<weight>/<LWH_unit>/<weight_unit>/<additional_need>")
+def submit_LTL_quote(org_city, des_city, email_address,item_description, destination_type, length, height, width, weight, LWH_unit, weight_unit, additional_need):
+    current_time = time.time()
+    quote_data = {
+        "userID": user_db[email_address]["id"],
+        "quoteId": str(int(current_time)),
+        "trucking_service" : "LTL",
+        "length" : length,
+        "width" : width,
+        "height" : height,
+        "weight" : weight,
+        "LWH_unit" : LWH_unit,
+        "weight_unit" : weight_unit,
+        "destination_type" : destination_type,
+        "additional_need": additional_need,
+        "org_city": org_city,
+        "des_city": des_city,
+        "item_description": item_description,
+        "current time": current_time,
+        "result": "na",
+        "list_prices": {
 
+        }
+    }
+
+    user_db[email_address]["quotes"].append(quote_data)
+
+    # TODO: to process this quote
+    # Follow a sequnce of startegies
+    # 1) Try the port query table (get_price)
+    #  if 1) returns na, we will move to 2)
+    #  if 1) returns the price, we will update the result right away, and finish this function
+    #a = get_price(org_city, des_city, container_count)
+    # if a != "na":
+    #     # move to 2)
+    #     lastindex = len(user_db[email_address]["quotes"]) - 1
+    #     user_db[email_address]["quotes"][lastindex]["result"] = a
+    #     return "OK"
+
+    # 2) Call the TTX API to get the price
+    #  if 2) returns na, we will move to 3)
+    # 3) Send email and wait for the reply
+    #  send the email and wait
+    send_FTL_quote_emails(quote_data)
+
+    return "OK"
 @app.route(
     "/submit_FCL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<container_type>")
 def submit_FCL_quote(org_city, des_city, item_description, email_address, container_type):
