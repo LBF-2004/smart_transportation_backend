@@ -194,6 +194,7 @@ def saved_quote_email():
             Major_ID = ParseEmails.get_major_minor_user_ids(subject)[0]
             Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
             userID = ParseEmails.get_major_minor_user_ids(subject)[2]
+
             for key, value in user_db.items():
                 # print(value)
                 if value["id"] == userID:
@@ -249,7 +250,7 @@ def signup(email_address, password, first_name, last_name, phone, company):
 @app.route("/login/<email_adress>/<password>")
 def login(email_adress, password):
     email_adress = email_adress.lower()
-    print (email_adress + password)
+    # print (email_adress + password)
     if email_adress in user_db:
         if user_db[email_adress]["password"] == password:
             print("Correct")
@@ -334,7 +335,7 @@ def send_FTL_quote_emails(quote_data):
                           "Web site: www.globalintertrans.com \n" +
                           "Email: Rachael@globalintertrans.com \n"
                   })
-        print(result)
+        # print(result)
 
 
 def send_LTL_quote_emails(quote_data):
@@ -448,9 +449,7 @@ def submit_FTL_quote(org_city, des_city, email_address,item_description, destina
         "item_description": item_description,
         "current time": current_time,
         "result": "na",
-        "list_prices": {
-
-        }
+        "list_prices": {}
     }
 
     user_db[email_address]["quotes"].append(quote_data)
