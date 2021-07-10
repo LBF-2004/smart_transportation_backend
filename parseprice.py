@@ -23,10 +23,11 @@ def tag(tokens):  # tagging words (NN, NP...)
 
 
 grammar = """PRICE:{<[$]><CD>}
+             DETAIL: {<DT>(<NN>|<NNP>|<PERSON>|<NNS>|<ORGANIZATION>){1,2}<IN><DT><NN>((<MD><VB>)|<VBZ>)<PRICE>}
              DETAIL:{<DT>?<VBG>?(<NN>|<NNS>|<NNP>|<JJ>|<ORGANIZATION>|<PERSON>|<[.]>|<GPE>|<CD>|<RB>|<IN>)+<VBD>?<[:]>?<MD>?<VBP>?<VB>?<VBZ>?(<[(]>(<JJ>|<CD>)<NN><NNS><[)]>)?<[:]>?<PRICE>}
              DETAIL:{<DT>?<VBG>?(<NN>|<NNS>|<NNP>|<JJ>|<ORGANIZATION>|<PERSON>|<[.]>|<GPE>|<CD>|<RB>|<IN>)+<VBD>?<[:]>?<VBP>?<VB>?<VBZ>?(<[(]>(<JJ>|<CD>)<NNP>(<NN>|<NNS>)<[)]>)?<PRICE>}
              DETAIL:{<PRICE><DT>?<VBG>?(<NN>|<NNS>|<NNP>|<JJ>|<ORGANIZATION>|<PERSON>|<[.]>|<GPE>|<CD>|<RB>|<IN>)+<VBP>?<VB>?}
-             DETAIL: {<'DT'><NN><NN><IN><DT><NN><MD><VB><PRICE>}
+             
              """
 
 

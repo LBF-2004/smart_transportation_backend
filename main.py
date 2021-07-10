@@ -191,18 +191,20 @@ def saved_quote_email():
                 if 'rate' in h["DETAIL"].lower() or 'line haul' in h["DETAIL"].lower() or 'shipment' in h[
                     'DETAIL'].lower():
                     result = float(h['PRICE'].replace('$', '').strip())
-            Major_ID = ParseEmails.get_major_minor_user_ids(subject)[0]
-            Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
-            userID = ParseEmails.get_major_minor_user_ids(subject)[2]
 
-            for key, value in user_db.items():
+            if result != 'na':
+                Major_ID = ParseEmails.get_major_minor_user_ids(subject)[0]
+                Minor_ID = ParseEmails.get_major_minor_user_ids(subject)[1]
+                userID = ParseEmails.get_major_minor_user_ids(subject)[2]
+
+                for key, value in user_db.items():
                 # print(value)
-                if value["id"] == userID:
-                    for quote in (value["quotes"]):
-                        if quote["quoteId"] == Major_ID:
-                            quote["list_prices"][Minor_ID] = str(result)
-                            print(result)
-                            quote['result'] = compare_prices(quote["list_prices"])
+                    if value["id"] == userID:
+                        for quote in (value["quotes"]):
+                            if quote["quoteId"] == Major_ID:
+                                quote["list_prices"][Minor_ID] = result
+                                print(result)
+                                quote['result'] = compare_prices(quote["list_prices"])
     return "New Quotes Saved and Compared"
 
 
@@ -315,12 +317,22 @@ def send_FTL_quote_emails(quote_data):
                                     
                                                                                       
                                                    "Commondity: " + quote_data["item_description"] + "\n" +
+                  "Dimension: " + "\n" +
+                          "Length:" + quote_data["length"] + "\n" +
+                  "Width: " + quote_data["width"] + "\n" +
+                  "Height: " + quote_data["height"] + "\n" +
+                  "Weight: " + quote_data["weight"] + "\n" +
+                  "Units: " + quote_data["LWH_unit"] + "," + quote_data["weight_unit"] + "\n" +
+
 
                                                                                                      "Delivery Address: " +
                           quote_data["des_city"] + "\n"
 
                                                    "\nNote: \n" +
-                           quote_data["destination_type"] + "\n" +
+                           quote_data["destination_type"] + " Address" + "\n" +
+
+
+
 
                           quote_data["additional_need"] + "\n"
 
@@ -354,17 +366,23 @@ def send_LTL_quote_emails(quote_data):
                           "\nThere is one shipment need your kind support. Please kindly check and advise your trucking charge per below info: \n" +
 
                           "\nFrom: " + quote_data["org_city"] + "\n"
-                                                                "Service: LTL" + "\n"
+                                                                "Service: FTL" + "\n"
 
 
-                                                                                     "Commondity: " + quote_data[
+                                                                                 "Commondity: " + quote_data[
                               "item_description"] + "\n" +
+                          "Dimension: " + "\n" +
+                          "Length:" + quote_data["length"] + "\n" +
+                          "Width: " + quote_data["width"] + "\n" +
+                          "Height: " + quote_data["height"] + "\n" +
+                          "Weight: " + quote_data["weight"] + "\n" +
+                          "Units: " + quote_data["LWH_unit"] + "," + quote_data["weight_unit"] + "\n" +
 
                           "Delivery Address: " +
                           quote_data["des_city"] + "\n"
 
                                                    "\nNote: \n" +
-                          quote_data["destination_type"] + "\n" +
+                          quote_data["destination_type"] + " Address" + "\n" +
 
                           quote_data["additional_need"] + "\n"
 
@@ -379,7 +397,7 @@ def send_LTL_quote_emails(quote_data):
                           "Web site: www.globalintertrans.com \n" +
                           "Email: Rachael@globalintertrans.com \n"
                   })
-        print(result)
+        # print(result)
 
 
 def send_FCL_quote_emails(quote_data):
@@ -405,7 +423,7 @@ def send_FCL_quote_emails(quote_data):
                               "item_description"] + "\n"
                                                     "Delivery Address: " +
                           quote_data["des_city"] + "\n"
-                                                   + quote_data["containerType"] + "\n"
+                                                   + quote_data["container_type"] + "\n"
 
                                                    "\nNote: \n" +
 
@@ -532,8 +550,8 @@ def submit_LTL_quote(org_city, des_city, email_address,item_description, destina
 
     return "OK"
 @app.route(
-    "/submit_FCL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<container_type>")
-def submit_FCL_quote(org_city, des_city, item_description, email_address, container_type):
+    "/submit_FCL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<container_type>/<additional_need>")
+def submit_FCL_quote(org_city, des_city, item_description, email_address, container_type,additional_need):
     current_time = time.time()
     quote_data = {
         "userID": user_db[email_address]["id"],
@@ -545,6 +563,7 @@ def submit_FCL_quote(org_city, des_city, item_description, email_address, contai
         "item_description": item_description,
         "current time": current_time,
         "result": "na",
+        "additional_need": additional_need,
         "list_prices": {
         }
     }
