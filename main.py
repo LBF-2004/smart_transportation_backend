@@ -317,24 +317,13 @@ def send_FTL_quote_emails(quote_data):
                                     
                                                                                       
                                                    "Commondity: " + quote_data["item_description"] + "\n" +
-                  "Dimension: " + "\n" +
-                          "Length:" + quote_data["length"] + "\n" +
-                  "Width: " + quote_data["width"] + "\n" +
-                  "Height: " + quote_data["height"] + "\n" +
-                  "Weight: " + quote_data["weight"] + "\n" +
-                  "Units: " + quote_data["LWH_unit"] + "," + quote_data["weight_unit"] + "\n" +
-
-
-                                                                                                     "Delivery Address: " +
-                          quote_data["des_city"] + "\n"
-
-                                                   "\nNote: \n" +
-                           quote_data["destination_type"] + " Address" + "\n" +
-
-
-
-
-                          quote_data["additional_need"] + "\n"
+                  "Dimension: " + quote_data["length"] + "*" + quote_data["width"] + "*" + quote_data["height"] + " " + "(" + quote_data["LWH_unit"] + ")" + "\n" +
+                  "Volume: " + quote_data["volume"] + " " + quote_data["volume_unit"] + "\n" +
+                  "Weight: " + quote_data["weight"] + " " + quote_data["weight_unit"] + "\n" +
+                  "Quantity: " + quote_data["quantity"] + " " + quote_data["package_type"]  + "\n" +
+                  "Delivery Address: " + quote_data["des_city"] + "\n"
+                  "\nNote: \n" + quote_data["destination_type"] + " Address" + "\n" +
+                  quote_data["additional_need"] + "\n"
 
                                                                "\nThank you," + "\n"
                                                                                 "Rachael Zhang" + "\n"
@@ -382,7 +371,7 @@ def send_LTL_quote_emails(quote_data):
                           quote_data["des_city"] + "\n"
 
                                                    "\nNote: \n" +
-                          quote_data["destination_type"] + " Address" + "\n" +
+                          quote_data["destination_type"] + "\n" +
 
                           quote_data["additional_need"] + "\n"
 
@@ -447,8 +436,8 @@ def send_FCL_quote_emails(quote_data):
 
 
 @app.route(
-    "/submit_FTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<destination_type>/<length>/<height>/<width>/<weight>/<LWH_unit>/<weight_unit>/<additional_need>")
-def submit_FTL_quote(org_city, des_city, email_address,item_description, destination_type, length, height, width, weight, LWH_unit, weight_unit, additional_need):
+    "/submit_FTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<destination_type>/<length>/<height>/<width>/<weight>/<LWH_unit>/<weight_unit>/<qty>/<package_type>/<volume>/<volume_unit>/<additional_need>")
+def submit_FTL_quote(org_city, des_city, email_address,item_description, destination_type, length, height, width, weight, LWH_unit, weight_unit, qty,package_type,volume,volume_unit, additional_need):
     current_time = time.time()
     quote_data = {
         "userID": user_db[email_address]["id"],
@@ -461,6 +450,10 @@ def submit_FTL_quote(org_city, des_city, email_address,item_description, destina
         "LWH_unit" : LWH_unit,
         "weight_unit" : weight_unit,
         "destination_type" : destination_type,
+        "quantity": qty,
+        "package_type": package_type,
+        "volume" : volume,
+        "volume_unit" : volume_unit,
         "additional_need": additional_need,
         "org_city": org_city,
         "des_city": des_city,
@@ -546,7 +539,7 @@ def submit_LTL_quote(org_city, des_city, email_address,item_description, destina
     #  if 2) returns na, we will move to 3)
     # 3) Send email and wait for the reply
     #  send the email and wait
-    send_FTL_quote_emails(quote_data)
+    send_LTL_quote_emails(quote_data)
 
     return "OK"
 @app.route(
