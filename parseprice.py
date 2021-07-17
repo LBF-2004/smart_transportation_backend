@@ -76,7 +76,7 @@ def extractPrice(sentences):
         price_index = 0
         detail_index = 0
         while detail_index < len(trees_detail):
-            if set(trees[price_index].leaves ).issubset(set(trees_detail[detail_index].leaves())) :
+            if set(trees[price_index].leaves()).issubset(set(trees_detail[detail_index].leaves())) :
                 price = ' '.join([w for w, t in trees[price_index].leaves()])
                 price_detail = ' '.join([w for w, t in trees_detail[detail_index].leaves()])
                 price_list.append({"DETAIL": price_detail, "PRICE": price})
