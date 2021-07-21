@@ -322,7 +322,9 @@ def send_FTL_quote_emails(quote_data):
                   "Weight: " + quote_data["weight"] + " " + quote_data["weight_unit"] + "\n" +
                   "Quantity: " + quote_data["quantity"] + " " + quote_data["package_type"]  + "\n" +
                   "Delivery Address: " + quote_data["des_city"] + "\n"
-                  "\nNote: \n" + quote_data["destination_type"] + " Address" + "\n" +
+                  "\nNote: \n" + "Please include $ sign for any rate/ price/ drayage/ haul" +  "\n" +
+                          quote_data["destination_type"] +
+                          " Address" + "\n" +
                   quote_data["additional_need"] + "\n"
 
                                                                "\nThank you," + "\n"
@@ -371,9 +373,10 @@ def send_LTL_quote_emails(quote_data):
                           quote_data["des_city"] + "\n"
 
                                                    "\nNote: \n" +
+                  "Please include $ sign for any rate/ price/ drayage/ haul" +  "\n" +
                           quote_data["destination_type"] + "\n" +
 
-                          quote_data["additional_need"] + "\n"
+                          quote_data["additional_need"] + "\n" 
 
                                                           "\nThank you," + "\n"
                                                                            "Rachael Zhang" + "\n"
@@ -415,6 +418,7 @@ def send_FCL_quote_emails(quote_data):
                                                    + quote_data["container_type"] + "\n"
 
                                                    "\nNote: \n" +
+                          "Please include $ sign for any rate/ price/ drayage/ haul" + "\n" +
 
                           quote_data["additional_need"] + "\n"
 
@@ -496,13 +500,13 @@ def submit_FTL_quote(org_city, des_city, email_address,item_description, destina
     # return str(line_haul[org_city][des_city] * container_count)
 
 @app.route(
-    "/submit_LTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<destination_type>/<length>/<height>/<width>/<weight>/<LWH_unit>/<weight_unit>/<additional_need>")
-def submit_LTL_quote(org_city, des_city, email_address,item_description, destination_type, length, height, width, weight, LWH_unit, weight_unit, additional_need):
+    "/submit_LTL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<destination_type>/<length>/<height>/<width>/<weight>/<LWH_unit>/<weight_unit>/<qty>/<package_type>/<volume>/<volume_unit>/<additional_need>")
+def submit_LTL_quote(org_city, des_city, email_address,item_description, destination_type, length, height, width, weight, LWH_unit, weight_unit, qty,package_type,volume,volume_unit, additional_need):
     current_time = time.time()
     quote_data = {
         "userID": user_db[email_address]["id"],
         "quoteId": str(int(current_time)),
-        "trucking_service" : "LTL",
+        "trucking_service" : "FTL",
         "length" : length,
         "width" : width,
         "height" : height,
@@ -510,19 +514,20 @@ def submit_LTL_quote(org_city, des_city, email_address,item_description, destina
         "LWH_unit" : LWH_unit,
         "weight_unit" : weight_unit,
         "destination_type" : destination_type,
+        "quantity": qty,
+        "package_type": package_type,
+        "volume" : volume,
+        "volume_unit" : volume_unit,
         "additional_need": additional_need,
         "org_city": org_city,
         "des_city": des_city,
         "item_description": item_description,
         "current time": current_time,
         "result": "na",
-        "list_prices": {
-
-        }
+        "list_prices": {}
     }
 
     user_db[email_address]["quotes"].append(quote_data)
-
     # TODO: to process this quote
     # Follow a sequnce of startegies
     # 1) Try the port query table (get_price)
@@ -542,9 +547,10 @@ def submit_LTL_quote(org_city, des_city, email_address,item_description, destina
     send_LTL_quote_emails(quote_data)
 
     return "OK"
+
 @app.route(
-    "/submit_FCL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<container_type>/<additional_need>")
-def submit_FCL_quote(org_city, des_city, item_description, email_address, container_type,additional_need):
+    "/submit_FCL_quote/<org_city>/<des_city>/<email_address>/<item_description>/<num_container>/<container_type>/<additional_need>")
+def submit_FCL_quote(org_city, des_city, item_description, email_address, container_type,additional_need, num_container):
     current_time = time.time()
     quote_data = {
         "userID": user_db[email_address]["id"],
@@ -554,6 +560,7 @@ def submit_FCL_quote(org_city, des_city, item_description, email_address, contai
         "org_city": org_city,
         "des_city": des_city,
         "item_description": item_description,
+        "num_container": num_container,
         "current time": current_time,
         "result": "na",
         "additional_need": additional_need,
