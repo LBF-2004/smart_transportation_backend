@@ -39,7 +39,7 @@ for line in f.readlines():
     # print(items[0], items[1]) # Key Value
     lax_price[items[0]] = float((items[1]))
 
-# print(lax_price)
+
 
 texas_price = {}
 
@@ -47,7 +47,7 @@ g = open("City_Price/tx_price", "r")
 for a in g.readlines():
     data = a.split(",")
     texas_price[data[0]] = float((data[1]))
-# print (texas_price)
+
 
 okc_price = {}
 
@@ -55,7 +55,7 @@ h = open("City_Price/okc_price", "r")
 for b in h.readlines():
     info = b.split(",")
     okc_price[info[0]] = float((info[1]))
-# print (okc_price)
+
 
 line_haul = {"tx": texas_price, "la": lax_price, "okc": okc_price}
 

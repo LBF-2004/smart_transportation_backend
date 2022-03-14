@@ -52,9 +52,6 @@ for b in h.readlines():
 line_haul = {"tx": texas_price, "la": lax_price, "okc": okc_price}
 
 
-# "lax" => "ALHAMBRA"
-# print(line_haul["lax"]["ALHAMBRA"])
-
 
 def get_price(org_city, des_city, container_count):
     # line_haul
@@ -82,32 +79,7 @@ def get_price(org_city, des_city, container_count):
     return str(line_haul[org_city][des_city] * container_count)
 
 
-# review how to use and call function
-# https://www.w3schools.com/python/python_functions.asp
 
-# "newuser@gmail.com" : {
-#     "password" : "test123",
-#     "name" : "Leo Liao",
-#     "phone" : "3451233434",
-#     "email" : "newuser@gmail.com",
-#     "id" : "user001",
-#     "quotes" : [
-#      {
-#        "id" : "q111",
-#        "org" : "lax",
-#        "des" : "92602",
-#        "time" : 123232324343,
-#        "result" : 760
-#      },
-#      {
-#        "id" : "q123",
-#        "org" : "ock",
-#        "des" : "92602",
-#        "time" : 123232343434,
-#        "result" : 890
-#      }
-#     ]
-#   }
 
 user_db = {
     "yusun@cpp.edu": {
