@@ -15,10 +15,10 @@ Table of Contents
 The Smart Transportation Backend is the core server-side component of a smart transportation system. It provides APIs for managing and optimizing transportation routes, handling real-time data from various sources, and ensuring seamless integration with other components of the system. The goal is to improve the efficiency of transportation networks and enhance the user experience.
 
 ## Features
-Route Optimization: Efficiently send and parse received emails from service providers.
-Real-time Data Handling: Process and store real-time data from various senders.
-API Integration: Google Cloud Platform, Firebase
-Data Analytics: Analyze transportation data to provide insights and reports.
+1. Route Optimization: Efficiently send and parse received emails from service providers.
+2. Real-time Data Handling: Process and store real-time data from various senders.
+3. API Integration: Google Cloud Platform, Firebase
+4. Data Analytics: Analyze transportation data to provide insights and reports.
 
 ## Technologies Used
 Python: Core programming language used for backend development.
