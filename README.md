@@ -1,4 +1,4 @@
-##Smart Transportation Backend
+## Smart Transportation Backend
 Welcome to the Smart Transportation Backend project! This repository contains the backend code for the Smart Transportation system, which aims to optimize and manage transportation networks efficiently.
 
 Table of Contents
@@ -12,10 +12,11 @@ API Documentation
 Contributing
 License
 Contact
-Overview
+
+## Overview
 The Smart Transportation Backend is the core server-side component of a smart transportation system. It provides APIs for managing and optimizing transportation routes, handling real-time data from various sources, and ensuring seamless integration with other components of the system. The goal is to improve the efficiency of transportation networks and enhance the user experience.
 
-Features
+## Features
 Route Optimization: Efficiently calculate and manage transportation routes.
 Real-time Data Handling: Process and store real-time data from various sensors and sources.
 API Integration: Provides RESTful APIs for communication with frontend applications and other services.
